@@ -10,10 +10,10 @@ from utils.pdf_indexer import get_embedder
 load_dotenv()
 
 TOP_K = 4
-HISTORY_MESSAGES = 10
+HISTORY_MESSAGES = 8
 TEMPERATURE = 0.2
 NOT_FOUND = "I could not find this information in the uploaded document."
-_PAGES_LINE = re.compile(r"^[ \t>*_-]*pages used\W*(.*)$", re.IGNORECASE | re.MULTILINE)
+_PAGES_TAIL = re.compile(r"[\s*_>\-]*pages used\W*((?:none|[\d,\s]|and|&)*)\W*$", re.IGNORECASE)
 
 
 def _split_answer(raw, retrieved_pages):
@@ -22,11 +22,10 @@ def _split_answer(raw, retrieved_pages):
     Returns (answer, pages_actually_used). If the model forgot the line, fall back
     to every retrieved page. A 'not found' answer has no sources.
     """
-    matches = list(_PAGES_LINE.finditer(raw))
-    if matches:
-        last = matches[-1]
-        answer = raw[: last.start()].strip()
-        used = {int(n) for n in re.findall(r"\d+", last.group(1))} & set(retrieved_pages)
+    m = _PAGES_TAIL.search(raw)
+    if m:
+        answer = raw[: m.start()].strip()
+        used = {int(n) for n in re.findall(r"\d+", m.group(1))} & set(retrieved_pages)
     else:
         answer = raw.strip()
         used = set(retrieved_pages)
