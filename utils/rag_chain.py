@@ -10,7 +10,7 @@ from utils.pdf_indexer import get_embedder
 load_dotenv()
 
 TOP_K = 4
-HISTORY_MESSAGES = 6
+HISTORY_MESSAGES = 10
 TEMPERATURE = 0.2
 NOT_FOUND = "I could not find this information in the uploaded document."
 _PAGES_LINE = re.compile(r"^[ \t>*_-]*pages used\W*(.*)$", re.IGNORECASE | re.MULTILINE)
